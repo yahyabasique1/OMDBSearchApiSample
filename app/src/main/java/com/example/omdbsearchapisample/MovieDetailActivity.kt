@@ -16,12 +16,15 @@ import android.widget.RelativeLayout
 import android.view.Gravity
 import android.view.View
 import android.widget.ProgressBar
+import dagger.android.support.DaggerAppCompatActivity
+import javax.inject.Inject
 
 
 const val API_KEY = "93568a45"
 
-class MovieDetailActivity : AppCompatActivity() {
+class MovieDetailActivity : DaggerAppCompatActivity() {
 
+    @Inject
     lateinit var apiInterface: ApiInterface
     private val compositeDisposable = CompositeDisposable()
 
@@ -34,7 +37,7 @@ class MovieDetailActivity : AppCompatActivity() {
         initProgressBar()
         progressBar.visibility=View.VISIBLE
 
-        apiInterface = ApiClient.getClient().create(ApiInterface::class.java)
+//        apiInterface = ApiClient.getClient().create(ApiInterface::class.java)
 
         val imdbID = intent.getStringExtra("ImdbId")
 
