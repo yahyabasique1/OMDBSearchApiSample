@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.omdbsearchapisample.RoomDB.AppDatabase
@@ -13,19 +12,19 @@ import com.example.omdbsearchapisample.adapter.API_TYPE
 import com.example.omdbsearchapisample.adapter.LOCAL_DB
 import com.example.omdbsearchapisample.adapter.MovieAdapter
 import com.example.omdbsearchapisample.model.Search
-import com.example.omdbsearchapisample.networking.ApiClient
 import com.example.omdbsearchapisample.networking.ApiInterface
 import kotlinx.android.synthetic.main.fragment_movie_layout.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers.io
 import android.view.MenuInflater
-import com.example.omdbsearchapisample.R
-import com.example.omdbsearchapisample.API_KEY
-import com.example.omdbsearchapisample.MovieDetailActivity
+import com.example.omdbsearchapisample.*
+import com.example.omdbsearchapisample.RoomDB.BookMarkDao
+import dagger.android.support.DaggerFragment
+import javax.inject.Inject
 
 
-class MovieListFragment() : Fragment() {
+class MovieListFragment() : DaggerFragment() {
 
 
     var loading = false
@@ -42,23 +41,31 @@ class MovieListFragment() : Fragment() {
 
     var movieName: String = ""
 
-
+    @Inject
     lateinit var apiInterface: ApiInterface
     lateinit var adapter: MovieAdapter
     private var layoutManager: LinearLayoutManager? = null
     private var pageNumber = 1
-    var appDatabase: AppDatabase? = null
+
+    @Inject
+    lateinit var appDatabase: AppDatabase
 
     private var isLastPage = false
+
+    lateinit var bookMarkDao: BookMarkDao
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true);
-
+//        (activity!!.application as ApplicationClass).getComponent().inject(this)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_movie_layout, container, false)
     }
 
@@ -66,23 +73,22 @@ class MovieListFragment() : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        apiInterface = ApiClient.getClient().create(ApiInterface::class.java)
-        appDatabase = AppDatabase.getInstance(context!!)
-
+//        movieListVM=ViewModelProviders.of(this).get(MovieListVM::class.java)
         layoutManager = LinearLayoutManager(context)
 
+        bookMarkDao = appDatabase.BookMarkDao()
 
         rvMovieList.layoutManager = layoutManager
 
 
         adapter = MovieAdapter(activity!!, object : MovieAdapter.IMovieAction {
             override fun delMovieFromBookMark(search: Search) {
-                appDatabase?.BookMarkDao()?.delete(search)
+
             }
 
             override fun sendImdbId(imdb: String) {
 
-                var intent = Intent(context, MovieDetailActivity::class.java)
+                val intent = Intent(context, MovieDetailActivity::class.java)
                 intent.putExtra("ImdbId", imdb)
                 startActivity(intent)
 
@@ -91,19 +97,16 @@ class MovieListFragment() : Fragment() {
             override fun addMovieToBookMark(search: Search) {
                 if (listType.equals("Api")) {
 
-
-                    appDatabase?.BookMarkDao()?.insertAll(search)
+                    bookMarkDao.insertAll(search)
                     Toast.makeText(context, "Added to watchlist", Toast.LENGTH_SHORT).show()
 
-
                 } else {
-                    appDatabase?.BookMarkDao()?.delete(search)
 
-                    appDatabase?.BookMarkDao()?.getAllBookmark()?.let {
+                    bookMarkDao.delete(search)
+                    bookMarkDao.getAllBookmark().let {
                         adapter.setMovieList(it, LOCAL_DB)
-                        Toast.makeText(context, "Deleted from watchlist", Toast.LENGTH_SHORT).show()
-
                     }
+                    Toast.makeText(context, "Deleted from watchlist", Toast.LENGTH_SHORT).show()
 
                 }
             }
@@ -113,15 +116,15 @@ class MovieListFragment() : Fragment() {
         val args = arguments
 
         if (args != null) {
-            movieName = args.getString("movieName", "friends")
 
+            movieName = args.getString("movieName", "friends")
             loadMovieData(movieName, pageNumber++)
+
 
         } else {
 
             movieName = "fight"
             loadMovieData(movieName, pageNumber++)
-
 
         }
 
@@ -142,8 +145,8 @@ class MovieListFragment() : Fragment() {
 
     private fun loadMovieData(s: String, pagenum: Int) {
 
-
-        compositeDisposable.add(apiInterface.getSearchMovieList(API_KEY, s, pagenum)
+        compositeDisposable.add(
+            apiInterface.getSearchMovieList(API_KEY, s, pagenum)
                 .subscribeOn(io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ searchApiResponse ->
@@ -161,10 +164,10 @@ class MovieListFragment() : Fragment() {
                         Toast.makeText(context, "End of Results", Toast.LENGTH_LONG).show()
                     }
                 },
-                        { error ->
+                    { error ->
 
-                            Toast.makeText(context, error.localizedMessage, Toast.LENGTH_SHORT).show()
-                        })
+                        Toast.makeText(context, error.localizedMessage, Toast.LENGTH_SHORT).show()
+                    })
         )
     }
 
@@ -180,7 +183,9 @@ class MovieListFragment() : Fragment() {
 
     override fun onDestroy() {
         compositeDisposable.clear()
-        AppDatabase.destroyInstance()
+        if (appDatabase.isOpen) {
+            appDatabase.close()
+        }
         super.onDestroy()
     }
 
@@ -195,9 +200,10 @@ class MovieListFragment() : Fragment() {
         when (item.itemId) {
             R.id.menuBookMark -> {
 
-                appDatabase?.BookMarkDao()?.getAllBookmark()?.let {
+                bookMarkDao.getAllBookmark()?.let {
                     if (it.isEmpty()) {
-                        Toast.makeText(context, "Your watch list is empty", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "Your watch list is empty", Toast.LENGTH_LONG)
+                            .show()
                         adapter.setMovieList(moviesList, API_TYPE)
                         listType = "Api"
                     } else {
@@ -247,6 +253,7 @@ class MovieListFragment() : Fragment() {
             }
         })
     }
+
 
 }
 

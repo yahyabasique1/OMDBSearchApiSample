@@ -44,7 +44,6 @@ dependencies {
 
 
     implementation 'android.arch.work:work-runtime:1.0.1'
-//    implementation 'android.arch.persistence.room:runtime:1.1.1'
     kapt "android.arch.persistence.room:compiler:1.1.1"
 
     annotationProcessor 'android.arch.persistence.room:compiler:1.1.1'
@@ -55,11 +54,28 @@ dependencies {
 
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0-beta04'
-    compile "androidx.core:core-ktx:+"
-    compile "androidx.lifecycle:lifecycle-viewmodel-ktx:2.0.0"
+    compile "androidx.core:core-ktx:1.1.0"
+//    compile "androidx.lifecycle:lifecycle-viewmodel-ktx:2.1.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     implementation 'com.android.support:design:29.0.0'
+
+    implementation "androidx.lifecycle:lifecycle-extensions:2.1.0"
+
+
+    compileOnly 'com.squareup.inject:assisted-inject-annotations-dagger2:0.4.0'
+    kapt 'com.squareup.inject:assisted-inject-processor-dagger2:0.4.0'
+
+    implementation "com.google.dagger:dagger-android:2.23.2"
+    implementation "com.google.dagger:dagger-android-support:2.23.2"
+    kapt "com.google.dagger:dagger-android-processor:2.23.2"
+    kapt "com.google.dagger:dagger-compiler:2.23.2"
+
+    implementation "android.arch.lifecycle:extensions:2.1.0"
+    kapt "android.arch.lifecycle:compiler:2.1.0"
+
+
+
 
 
 }

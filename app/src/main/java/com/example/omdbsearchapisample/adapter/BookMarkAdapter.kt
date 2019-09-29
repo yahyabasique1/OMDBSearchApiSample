@@ -57,7 +57,7 @@ class BookMarkAdapter(private var context: Context, private var allBookmark: Lis
 
         holder.ivMovieDelete.setOnClickListener {
 
-            iSearchActions.deleteMovieFromBookMark(search)
+            iSearchActions.deleteMovieFromBookMark(search,position)
 
         }
 
@@ -72,7 +72,7 @@ class BookMarkAdapter(private var context: Context, private var allBookmark: Lis
 
 
     interface ISearchActions {
-        fun deleteMovieFromBookMark(imdbId: Search)
+        fun deleteMovieFromBookMark(imdbId: Search,position: Int)
         fun onMovieClicked(name: String)
     }
 }

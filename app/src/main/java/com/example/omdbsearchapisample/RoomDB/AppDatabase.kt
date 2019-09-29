@@ -14,24 +14,24 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun BookMarkDao(): BookMarkDao
 
 
-    companion object {
-        private var INSTANCE: AppDatabase? = null
-
-        fun getInstance(context: Context): AppDatabase? {
-            if (INSTANCE == null) {
-                synchronized(AppDatabase::class) {
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                            AppDatabase::class.java, "bookmark.db")
-                            .allowMainThreadQueries()
-                            .build()
-                }
-            }
-            return INSTANCE
-        }
-
-        fun destroyInstance() {
-            INSTANCE = null
-        }
-    }
+//    companion object {
+//        private var INSTANCE: AppDatabase? = null
+//
+//        fun getInstance(context: Context): AppDatabase? {
+//            if (INSTANCE == null) {
+//                synchronized(AppDatabase::class) {
+//                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
+//                            AppDatabase::class.java, "bookmark.db")
+//                            .allowMainThreadQueries()
+//                            .build()
+//                }
+//            }
+//            return INSTANCE
+//        }
+//
+//        fun destroyInstance() {
+//            INSTANCE = null
+//        }
+//    }
 
 }

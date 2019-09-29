@@ -10,6 +10,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+const val BASE_URL="http://www.omdbapi.com/"
 object ApiClient {
     private lateinit var retrofit: Retrofit
 
@@ -24,7 +25,7 @@ object ApiClient {
                 .create();
 
         retrofit = Retrofit.Builder()
-                .baseUrl("http://www.omdbapi.com/")
+                .baseUrl(BASE_URL)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(client)
