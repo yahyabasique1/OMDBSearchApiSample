@@ -9,3 +9,12 @@ Features list:
 ● Horizontal scroll view to get to all bookmarks by scrolling with name and image. 
 ● Bookmarks is persistent across multiple app launches(RoomDB is used for local storage) 
 ● Option to remove the bookmarks from search results and bookmark list
+
+Language
+Kotlin 
+
+Library used
+Retrofit
+RxJava
+Dagger 2 
+Roomdb
